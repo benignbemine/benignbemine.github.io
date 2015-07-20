@@ -5,11 +5,11 @@ permalink:           pretty
 relative_permalinks: true
 
 # Setup
-title:               Blog
+title:               Kyle Owen
 tagline:             'A Blog.'
 description:         'A Blog.'
-url:                 http://benignbemine.github.io/
-baseurl:             ''
+url:                 http://benignbemine.github.io
+baseurl:             'http://benignbemine.github.io'
 paginate:            5
 
 # About/contact
