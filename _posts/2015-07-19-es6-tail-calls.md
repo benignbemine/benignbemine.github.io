@@ -3,13 +3,13 @@ layout: post
 title: ES6 Tail Call Optimization
 ---
 
-The goal of this post to give the reader some insight into the es6 tail call optimizations. What follows has been influenced by my current SICP studies and from reading other blog posts.
+The goal of this post to give the reader some insight into the ES6 tail call optimization. What follows has been influenced by my current [SICP](https://mitpress.mit.edu/sicp/) studies and from reading other blog posts.
 
-The first thing to know about the ES6 tail call optimization is that it is an optimization which INTERPRETERS will implement. There is not some new JS symbol which denotes tail-call-optimization or anything like that, so if you are reading below looking for how the code has extra stuff in it, you will be left unsatisfied.
+The first thing to know about ES6 tail call optimizations is that it is an optimization which interpreters will implement. There is not some new JS symbol which denotes tail-call-optimization or anything like that, so if you are reading below looking for how the code has extra stuff in it, you will be left unsatisfied.
 
-To talk about the tail call optimizations, it'll be useful to discuss the fibonacci sequence and about the difference between a recursive procedure and a recursive process. You may have seen a lot of this before, but I promise - it'll be worth the read.
+To talk about the tail call optimization, it'll be useful to discuss the calculation of fibonacci numbers and the difference between a recursive process and a recursive procedure. Although tail call optimizations can occur in non-recursive functions, this fibonacci example is useful for understanding some situations where the optimization will occur. You may have seen some of this before, but I promise - it'll be worth the read.
 
-Fibonacci sequence written as a recursive process:
+Let's first calculate fibonacci numbers using a recursive process:
 
 {% highlight js %}
 
@@ -46,13 +46,13 @@ Below is a diagram of how this process will develop - each node in this tree rep
 
 {% endhighlight %}
 
-Notice, none of these nodes has any clue that they are part of a huge process and none of the nodes on this tree has enough information to encapsulate the entire state of the process. For example, the calls to fib(2) have no clue that they are part of a process to calculate the value of fib(5). So, what is keeping track of the process' state? The call stack.
+Notice, none of these nodes has any clue that they are part of a huge process to calculate fib(5) and none of the nodes on this tree have enough information to encapsulate the entire state of the process. For example, the calls to fib(2) have no clue that they are part of a process to calculate the value of fib(5). So, what is keeping track of the process' state? The call stack.
 
-The call stack keeps track of all of the ways that these function calls need to be combined after the calculations complete. The call stack is the one remembering to combine the calls of fib(4) and fib(3) to get fib(5). This is a recursive process: think of a recursive process as a series of deferred operations, where there is information hidden to each recursive call - that hidden information is in the call stack.
+The call stack keeps track of all of the ways that these calls to fib need to be combined after the calculations complete. The call stack is the one remembering to combine the calls of fib(3) and fib(2) to get fib(4), and the calls of fib(4) and fib(3) to get fib(5). If we were to stop the interpreter partway through the process, and resume execution in a new environment with a clean call stack, there would be no way to complete the process, since all of the information about how to combine recursive calls would have been lost. Think of a recursive process as a series of deferred operations, where there is information hidden to each recursive call - that hidden information is in the call stack.
 
 When executing this in a browser, there are a bunch of stack frames which are created, with new environments for each call. You can see this in your chrome debugger.
 
-Besides the fact that this algorithm repeats a lot of calculations unnecessarily (fib(1) is calculated many times), this algorithm is a poor one because it requires O(n) memory complexity on the call stack. Looking at the left branch of the tree, whatever n is the call stack will have n deferred stack frames.
+Besides the fact that this algorithm repeats a lot of calculations unnecessarily (fib(1) is calculated many times), this algorithm is a poor one because it requires O(n) memory complexity on the call stack. Looking at the left branch of the fib tree above, the call stack will have at most n stack frames at any given time.
 
 Now, here is an iterative way to calculate fibonacci sequence:
 
@@ -124,33 +124,44 @@ fibIterRecursive(0, 8, 5)
 
 {% endhighlight %}
 
-In this implementation, there entire state of the proces IS encapsulated in each function call. Notice, each call has enough information to complete the process for calculating fib(5), which is in contrast to the recursive process' nodes from above. If we stopped that process at fibIterRecursive(2, 3, 2) and then resumed it in a different environment with a clean call stack, we would still get the correct number. We can call this implementation a recursive procedure - a function that calls itself, but does not necessarily have hidden information which the interpreter needs to keep track of.
+In this implementation, there entire state of the process is encapsulated in each function call. Notice, each call has enough information to complete the process for calculating fib(5). If we stopped that process at fibIterRecursive(2, 3, 2) and then resumed it in a different environment with a clean call stack, we would still get the correct number. This is in contrast to the recursive process' nodes from above, which had no clue how they were being combined (the interpreter kept track of that). We can call the fibIterRecursive implementation a recursive procedure - a function that calls itself, but does not necessarily have hidden information which the interpreter needs to keep track of.
 
-One would hope that the call stack would not bother remembering a bunch of information in stack frames, since that would be unnecessary.  But, it still does in ES5. In ES6, the call stack won't - and that is the optimization.
+The fibIterRecursive function mirrors the fibIter function from above, so one would hope that the number of stack frames in each process would be the same. Ideally, when calculating fibIterRecursive, the call stack would not bother remembering a bunch of information in stack frames, since that would be unnecessary. But, it still does in ES5 - for each call to fibIterRecursive, a new stack frame is created. That means that in ES5, we still have O(n) memory complexity. In ES6, new stack frames will not be created thus allowing for a O(1) memory complexity - and that is the optimization. Let's see how that works...
 
-In ES6, using the same exact code as fibIterRecursive, what will happen during each call is:
+In ES6, using the same exact code as fibIterRecursive, the interpreter will notice a few things:
 
-The interpreter will notice that the next recursive call does not need access to any of the local variables in the current stack frame, so it will CLEAR the current stack frame and REUSE IT. This is great because, in es5, calling fibIterRecursive(30000) will give you a stack overflow, but in es6 with the optimization, the stack frame will be reused and it won't cause a stack overflow (however, without a bigInt library, fibIterRecursive(30000) would return Infinity).
+- the last thing that needs to evaluate before the return statement is a function call
+- there is no action after the function call that the interpreter needs to remember to do (like combining fib(n-1) and fib(n+1) in the first example)
+- the next recursive call does not need access to any of the local variables in the current stack frame
 
-To generalize, if the last thing that happens before the return statement is the invocation of a function which does not need to access any of the current local variables, the interpreter specified by ES6 will now optimize that call by reusing the stack frame.
+So, instead of creating a new stack frame for each call, the current stack frame will be cleared and reused. This is great because, in es5, calling fibIterRecursive(30000) will give you a stack overflow due to the O(n) memory complexity, but in es6 with the optimization, the stack frame will be reused and it won't cause a stack overflow (however, without a bigInt library, fibIterRecursive(30000) would return Infinity).
+
+To summarize, if the last thing that happens before the return statement is the invocation of a function which does not need to access any of the current local variables, the interpreter specified by ES6 will now optimize that call by reusing the stack frame. Something important to notice: this optimization will not apply to recursive processes as defined above (since they are characterized by interpreters keeping track of hidden information). The optimization will apply recursive procedures as defined above, and other non-recursive processes. Here is an example without recursion:
 
 {% highlight js %}
 
-// This will work:
+function add(a,b){
+  return a + b;
+}
 
-return add(1,2);
+// In sumTwoNumbers, the call to add will be optimized:
 
-// But this:
+function sumTwoNumbers(a,b){
+  return add(a,b);
+}
 
-return add(1,2) + add(3,4);
+// But in sumFourNumbers:
 
-// won't because the interpreter needs to remember
+function sumFourNumbers(a,b,c,d){
+  return add(a,b) + add(c,d);
+}
+
+// the optimization won't happen because the interpreter needs to remember
 // to add together the values returned by add(1,2) and add(3,4).
-
+// The last thing to happen before the return is not a function invocation.
 
 {% endhighlight %}
 
+It's an interpreter thing. Note: you must be in strict mode for this optimization to work.
 
-It's an interpreter thing.
-
-There is a creative way to get around this in es5. It's not used often. If you're interested check out http://raganwald.com/2013/03/28/trampolines-in-javascript.html .
+There is a creative way to get around this in es5. It's not used often. If you're interested check out [this great blog post](http://raganwald.com/2013/03/28/trampolines-in-javascript.html). Other resources for understanding tail calls that I've found helpful include: [this](http://www.2ality.com/2015/06/tail-call-optimization.html) and [that](http://raganwald.com/2015/02/07/tail-calls-defult-arguments-recycling.html)
