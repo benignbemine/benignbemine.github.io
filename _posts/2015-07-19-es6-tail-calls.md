@@ -5,7 +5,7 @@ title: ES6 Tail Call Optimization
 
 This post will summarize my current understanding of how ES6 tail call optimizations will work. What follows has been influenced by my current [SICP](https://mitpress.mit.edu/sicp/) studies and from reading other blog posts.
 
-Before we begin, it's important to understand that the ES6 tail call optimization is an optimization implemented by the interpreter. ES6 does not specify new syntax for denoting tail call optimization, so don't continue reading with the belief that you will see any new JS syntax. Instead, pay attention to how the code is structured.
+Before we begin, it's important to understand that the ES6 tail call optimization is an optimization implemented by the interpreter. ES6 does not specify new syntax for denoting tail call optimization, so don't continue reading expecting to see any new JS syntax. Instead, pay attention to how the code is structured.
 
 To talk about the tail call optimization, it'll be useful to discuss different ways to calculate fibonacci numbers, and the difference between a recursive process and a recursive procedure. Although tail call optimizations can occur in non-recursive functions, the fibonacci examples below are useful for understanding some situations where the optimization will occur. You may have seen some of this before, but I promise - it'll be worth the read.
 
