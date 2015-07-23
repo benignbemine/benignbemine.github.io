@@ -3,8 +3,6 @@ layout: post
 title: ES6 Tail Call Optimization Explained
 ---
 
-I'm super excited about ES6 tail call optimizations! What follows has been influenced by my current [SICP](https://mitpress.mit.edu/sicp/) studies.
-
 {% highlight js %}
 
 return foo();
@@ -66,7 +64,7 @@ So, what is keeping track of this information? What keeps track of how each of t
 
 The call stack keeps track of how each call to fib must be combined after their calculations complete. The call stack is the one remembering to combine the calls of fib(3) and fib(2) to get fib(4), and the calls of fib(4) and fib(3) to get fib(5).
 
-If we were to stop the interpreter partway through the process and resume execution in a new environment with a clean call stack, there would be no way to complete the process, since all of the information about how to combine recursive calls would have been lost. **Think of a recursive process as a series of deferred operations, where there is information hidden to each recursive call - that hidden information is in the call stack.** (*this is something I learned from SICP*)
+If we were to stop the interpreter partway through the process and resume execution in a new environment with a clean call stack, there would be no way to complete the process, since all of the information about how to combine recursive calls would have been lost. **Think of a recursive process as a series of deferred operations, where there is information hidden to each recursive call - that hidden information is in the call stack.**
 
 When executing this in a browser, there are a bunch of stack frames which are created, with new environments for each call. You can see this in your browser's debugger.
 
@@ -146,7 +144,7 @@ fibIterRecursive(0, 8, 5)
 
 In this implementation, the entire state of the process **is** encapsulated in each function call. Notice, each call has enough information to complete the process for calculating fib(5). If we stopped that process at fibIterRecursive(2, 3, 2) and then resumed it in a different environment with a clean call stack, we would still get the correct number. This is in contrast to the recursive process' nodes from above, which had no clue how they were being combined (the interpreter kept track of that).
 
-**We can call the fibIterRecursive implementation a recursive procedure - a function that calls itself, but does not have hidden information which the interpreter needs to keep track of.** (*this is another thing I learned from SICP*)
+**We can call the fibIterRecursive implementation a recursive procedure - a function that calls itself, but does not have hidden information which the interpreter needs to keep track of.**
 
 ## The Optimization
 
@@ -201,6 +199,6 @@ function addOne(a){
 
 {% endhighlight %}
 
-It's an interpreter thing. Note: you must be in strict mode for this optimization to work. Here is a link to the [ES6 compatibility](https://kangax.github.io/compat-table/es6/) to see where the optimization has been implemented. Other resources for understanding tail calls that I've found helpful include: [this](http://www.2ality.com/2015/06/tail-call-optimization.html) and [that](http://raganwald.com/2015/02/07/tail-calls-defult-arguments-recycling.html)
+It's an interpreter thing. Note: you must be in strict mode for this optimization to work. Here is a link to the [ES6 compatibility](https://kangax.github.io/compat-table/es6/) to see where the optimization has been implemented. Other resources for understanding tail calls that I've found helpful include: [this](http://www.2ality.com/2015/06/tail-call-optimization.html) and [that](http://raganwald.com/2015/02/07/tail-calls-defult-arguments-recycling.html). Also, my favorite resource for understanding recursion: [SICP](https://mitpress.mit.edu/sicp/)
 
 Note: there is a creative way to get around this in es5. It's not used often. If you're interested check out [this great blog post](http://raganwald.com/2013/03/28/trampolines-in-javascript.html).
