@@ -13,13 +13,13 @@ return foo();
 
 A tail call optimization may occur when the last thing to evaluate before a function returns is a function invocation. In certain circumstances, the interpreter can the reuse current stack frame for the function call instead of creating a new one. Below I will explain what circumstances are necessary and why this is an optimization.
 
-### Interpreter
+## Interpreter
 
 Before we begin, it's important to understand that the ES6 tail call optimization is an optimization implemented by the interpreter. ES6 does not specify new syntax for denoting tail call optimization, so don't continue reading expecting to see any new JS syntax. Instead, pay attention to how the code is structured.
 
 To talk about the tail call optimization, it'll be useful to discuss different ways to calculate fibonacci numbers, and the difference between a recursive process and a recursive procedure. Although tail call optimizations can occur in non-recursive functions, the fibonacci examples below are useful for understanding some situations where the optimization will occur. You may have seen some of this before, but I promise - it'll be worth the read.
 
-### Fibonacci
+## Fibonacci
 
 Let's first calculate fibonacci numbers using a recursive process:
 
@@ -70,7 +70,7 @@ If we were to stop the interpreter partway through the process and resume execut
 
 When executing this in a browser, there are a bunch of stack frames which are created, with new environments for each call. You can see this in your browser's debugger.
 
-### Fibonacci another way
+## Fibonacci another way
 
 Besides the fact that the algorithm above repeats a lot of calculations unnecessarily (fib(1) is calculated many times), the algorithm has O(n) memory complexity for the call stack. Looking at the bottom of left branch of the fib tree above, when calculating fib(1) the callstack has 5 frames on it - the calls to fib 5 to 1 each remembering how to combine with the other calls. When fib(1) completes, that stack frame is popped off the call stack (so fib(2) would be at the top of the stack), and then another stack frame gets added to calculated fib(0). So for the fib implementation above, the call stack will have at most n stack frames at any given time. O(n) memory complexity.
 
@@ -148,7 +148,7 @@ In this implementation, the entire state of the process **is** encapsulated in e
 
 **We can call the fibIterRecursive implementation a recursive procedure - a function that calls itself, but does not have hidden information which the interpreter needs to keep track of.**
 
-### The Optimization
+## The Optimization
 
 The fibIterRecursive function mirrors the fibIter function from above, so one would hope that the number of stack frames in each process would be the same. Ideally, when calculating fibIterRecursive, the call stack would not bother remembering a bunch of information in stack frames, since that would be unnecessary. But, it still does in ES5 - for each call to fibIterRecursive, a new stack frame is created. That means that in ES5, we still have O(n) memory complexity. **In ES6, new stack frames will not be created thus allowing for a O(1) memory complexity - and that is the optimization**. Let's see how that works...
 
