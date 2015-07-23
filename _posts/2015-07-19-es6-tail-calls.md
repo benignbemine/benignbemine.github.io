@@ -1,9 +1,9 @@
 ---
 layout: post
-title: ES6 Tail Call Optimization
+title: ES6 Tail Call Optimization Explained
 ---
 
-I'm super excited about the ES6 tail call optimizations! This post will summarize my current understanding of how ES6 tail call optimizations work. What follows has been influenced by my current [SICP](https://mitpress.mit.edu/sicp/) studies.
+I'm super excited about ES6 tail call optimizations! What follows has been influenced by my current [SICP](https://mitpress.mit.edu/sicp/) studies.
 
 {% highlight js %}
 
