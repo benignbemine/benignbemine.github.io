@@ -3,7 +3,15 @@ layout: post
 title: ES6 Tail Call Optimization
 ---
 
-This post will summarize my current understanding of how ES6 tail call optimizations will work. What follows has been influenced by my current [SICP](https://mitpress.mit.edu/sicp/) studies and from reading other blog posts.
+I'm super excited about the ES6 tail call optimizations! This post will summarize my current understanding of how ES6 tail call optimizations work. What follows has been influenced by my current [SICP](https://mitpress.mit.edu/sicp/).
+
+{% highlight js %}
+
+return foo();
+
+{% endhighlight %}
+
+A tail call optimization may occur when the last thing to evaluate before a function returns is a function invocation. In certain circumstances, the interpreter can the reuse current stack frame for the function call instead of creating a new one. Below I will explain what circumstances are necessary and why this is an optimization
 
 Before we begin, it's important to understand that the ES6 tail call optimization is an optimization implemented by the interpreter. ES6 does not specify new syntax for denoting tail call optimization, so don't continue reading expecting to see any new JS syntax. Instead, pay attention to how the code is structured.
 
