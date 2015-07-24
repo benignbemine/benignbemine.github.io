@@ -3,6 +3,8 @@ layout: post
 title: ES6 Tail Call Optimization Explained
 ---
 
+From Wikipedia: "A tail call is a subroutine call performed as the final action of a procedure."
+
 {% highlight js %}
 
 return foo();
